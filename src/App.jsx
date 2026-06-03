@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const C = {
@@ -163,78 +163,82 @@ export default function Portfolio() {
   const isMobile = useIsMobile();
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif", overflowX: "hidden" }}>
-      <div style={{ position: "fixed", inset: 0, backgroundImage: "radial-gradient(circle, #c8d0e8 1px, transparent 1px)", backgroundSize: "28px 28px", opacity: 0.4, pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", top: "-180px", left: "-180px", width: "560px", height: "560px", borderRadius: "50%", background: "radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+    <>
+      <Analytics />
+      <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif", overflowX: "hidden" }}>
+        <div style={{ position: "fixed", inset: 0, backgroundImage: "radial-gradient(circle, #c8d0e8 1px, transparent 1px)", backgroundSize: "28px 28px", opacity: 0.4, pointerEvents: "none", zIndex: 0 }} />
+        <div style={{ position: "fixed", top: "-180px", left: "-180px", width: "560px", height: "560px", borderRadius: "50%", background: "radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: "940px", margin: "0 auto", padding: isMobile ? "0 16px" : "0 24px" }}>
+        <div style={{ position: "relative", zIndex: 1, maxWidth: "940px", margin: "0 auto", padding: isMobile ? "0 16px" : "0 24px" }}>
 
-        {/* NAV */}
-        <nav style={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          justifyContent: "space-between",
-          alignItems: isMobile ? "stretch" : "center",
-          padding: "20px 0 0",
-          marginBottom: isMobile ? "28px" : "48px",
-          gap: isMobile ? "12px" : "0",
-        }}>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ width: "34px", height: "34px", borderRadius: "9px", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(37,99,235,0.28)", flexShrink: 0 }}>
-              <span style={{ fontSize: "13px", fontWeight: "800", color: "#fff" }}>HS</span>
-            </div>
-            <span style={{ fontSize: "14px", fontWeight: "700", color: C.text }}>Hendrik Stolzke</span>
-          </motion.div>
-
-          {/* Nav buttons – full width on mobile */}
-          <div style={{
+          {/* NAV */}
+          <nav style={{
             display: "flex",
-            gap: "4px",
-            ...(isMobile ? { width: "100%" } : {}),
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "space-between",
+            alignItems: isMobile ? "stretch" : "center",
+            padding: "20px 0 0",
+            marginBottom: isMobile ? "28px" : "48px",
+            gap: isMobile ? "12px" : "0",
           }}>
-            {["Home", "Projekte", "Lebenslauf"].map((item) => (
-              <button key={item} onClick={() => setActive(item)} style={{
-                background: active === item ? C.accentLight : "transparent",
-                border: `1px solid ${active === item ? C.accentBorder : "transparent"}`,
-                color: active === item ? C.accent : C.textSoft,
-                padding: "7px 16px",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontSize: "13px",
-                fontWeight: "600",
-                transition: "all 0.15s",
-                flex: isMobile ? 1 : "none",
-                textAlign: "center",
-              }}>
-                {item}
-              </button>
-            ))}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ width: "34px", height: "34px", borderRadius: "9px", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(37,99,235,0.28)", flexShrink: 0 }}>
+                <span style={{ fontSize: "13px", fontWeight: "800", color: "#fff" }}>HS</span>
+              </div>
+              <span style={{ fontSize: "14px", fontWeight: "700", color: C.text }}>Hendrik Stolzke</span>
+            </motion.div>
+
+            {/* Nav buttons – full width on mobile */}
+            <div style={{
+              display: "flex",
+              gap: "4px",
+              ...(isMobile ? { width: "100%" } : {}),
+            }}>
+              {["Home", "Projekte", "Lebenslauf"].map((item) => (
+                <button key={item} onClick={() => setActive(item)} style={{
+                  background: active === item ? C.accentLight : "transparent",
+                  border: `1px solid ${active === item ? C.accentBorder : "transparent"}`,
+                  color: active === item ? C.accent : C.textSoft,
+                  padding: "7px 16px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  transition: "all 0.15s",
+                  flex: isMobile ? 1 : "none",
+                  textAlign: "center",
+                }}>
+                  {item}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          <AnimatePresence mode="wait">
+            {active === "Home" && <HomePage key="home" setActive={setActive} isMobile={isMobile} />}
+            {active === "Projekte" && <ProjectsPage key="projects" isMobile={isMobile} />}
+            {active === "Lebenslauf" && <CVPage key="lebenslauf" isMobile={isMobile} />}
+          </AnimatePresence>
+
+          {/* FOOTER */}
+          <div style={{
+            marginTop: "80px",
+            paddingBottom: "32px",
+            borderTop: `1px solid ${C.border}`,
+            paddingTop: "20px",
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "space-between",
+            alignItems: isMobile ? "flex-start" : "center",
+            gap: "4px",
+          }}>
+            <span style={{ fontSize: "12px", color: C.textSoft }}>2026 Hendrik Stolzke</span>
+            <span style={{ fontSize: "12px", color: C.textSoft }}>Student · M.Sc. Digital Business Engineering</span>
           </div>
-        </nav>
-
-        <AnimatePresence mode="wait">
-          {active === "Home" && <HomePage key="home" setActive={setActive} isMobile={isMobile} />}
-          {active === "Projekte" && <ProjectsPage key="projects" isMobile={isMobile} />}
-          {active === "Lebenslauf" && <CVPage key="lebenslauf" isMobile={isMobile} />}
-        </AnimatePresence>
-
-        {/* FOOTER */}
-        <div style={{
-          marginTop: "80px",
-          paddingBottom: "32px",
-          borderTop: `1px solid ${C.border}`,
-          paddingTop: "20px",
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          justifyContent: "space-between",
-          alignItems: isMobile ? "flex-start" : "center",
-          gap: "4px",
-        }}>
-          <span style={{ fontSize: "12px", color: C.textSoft }}>2026 Hendrik Stolzke</span>
-          <span style={{ fontSize: "12px", color: C.textSoft }}>Student · M.Sc. Digital Business Engineering</span>
         </div>
       </div>
-    </div>
+      <Analytics />
+    </>
   );
 }
 
