@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
+import { track } from '@vercel/analytics';
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const C = {
@@ -162,9 +163,72 @@ export default function Portfolio() {
   const [active, setActive] = useState("Home");
   const isMobile = useIsMobile();
 
+  // Ref für die Zeitmessung erstellen
+  const pageStartTime = useRef(Date.now());
+
+  // Globaler Click-Tracker für Buttons und Links
+  useEffect(() => {
+    const handleClick = (event) => {
+      const target = event.target.closest("button, a");
+      if (!target) return;
+
+      const label = (
+        target.innerText ||
+        target.getAttribute("aria-label") ||
+        ""
+      ).trim();
+
+      const href = target.getAttribute("href");
+
+      if (target.tagName === "BUTTON") {
+        track("button_click", {
+          label: label || "unknown",
+          page: active,
+        });
+      }
+
+      if (target.tagName === "A") {
+        track("link_click", {
+          label: label || "unknown",
+          href: href || "",
+          page: active,
+        });
+      }
+    };
+
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [active]);
+
+  // Navigation tracken & Verweildauer (Time spent) berechnen
+  useEffect(() => {
+    // 1. Erst den Page View für die neue Seite tracken
+    track("page_view", {
+      page: active,
+    });
+
+    // 2. Zeitstempel für diese Seite setzen
+    pageStartTime.current = Date.now();
+
+    // 3. Cleanup-Funktion: Feuert, DIREKT BEVOR der Tab gewechselt wird
+    return () => {
+      const timeSpentSeconds = Math.round((Date.now() - pageStartTime.current) / 1000);
+
+      // Nur tracken, wenn der Nutzer mindestens 1 Sekunde da war
+      if (timeSpentSeconds > 0) {
+        track("page_duration", {
+          page: active,
+          seconds: String(timeSpentSeconds), // Wichtig: Vercel akzeptiert nur Strings!
+        });
+      }
+    };
+  }, [active]);
+
   return (
     <>
+      {/* FIX 1: Nur noch EINMAL am Anfang deines Layouts platzieren */}
       <Analytics />
+
       <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif", overflowX: "hidden" }}>
         <div style={{ position: "fixed", inset: 0, backgroundImage: "radial-gradient(circle, #c8d0e8 1px, transparent 1px)", backgroundSize: "28px 28px", opacity: 0.4, pointerEvents: "none", zIndex: 0 }} />
         <div style={{ position: "fixed", top: "-180px", left: "-180px", width: "560px", height: "560px", borderRadius: "50%", background: "radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
@@ -188,7 +252,7 @@ export default function Portfolio() {
               <span style={{ fontSize: "14px", fontWeight: "700", color: C.text }}>Hendrik Stolzke</span>
             </motion.div>
 
-            {/* Nav buttons – full width on mobile */}
+            {/* Nav buttons */}
             <div style={{
               display: "flex",
               gap: "4px",
@@ -237,7 +301,7 @@ export default function Portfolio() {
           </div>
         </div>
       </div>
-      <Analytics />
+      {/* FIX 2: Das zweite <Analytics /> Tag am Ende wurde hier gelöscht! */}
     </>
   );
 }
@@ -417,7 +481,7 @@ function HomePage({ setActive, isMobile }) {
             <div style={{ fontSize: isMobile ? "11px" : "12px", fontWeight: "700", color: C.text, marginBottom: "3px", lineHeight: 1.4 }}>{s.label}</div>
             <div style={{ fontSize: "10px", color: C.textSoft, lineHeight: 1.45 }}>{s.sub}</div>
             {s.hasBachelor && (
-              <a href="/thesis.pdf" download
+              <a href="/thesis.pdf" download aria-label={`Bachelorarbeit Download - ${s.label}`}
                 style={{ marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "5px", fontSize: "11px", fontWeight: "600", color: s.color, textDecoration: "none", padding: "4px 9px", borderRadius: "6px", background: s.colorLight, border: `1px solid ${s.colorBorder}`, transition: "opacity 0.15s" }}
                 onMouseEnter={(e) => e.currentTarget.style.opacity = "0.78"}
                 onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}>
