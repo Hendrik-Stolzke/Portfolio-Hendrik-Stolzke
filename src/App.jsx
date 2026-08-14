@@ -166,6 +166,7 @@ export default function Portfolio() {
   // Ref für die Zeitmessung erstellen
   const pageStartTime = useRef(Date.now());
 
+
   // Globaler Click-Tracker für Buttons und Links
   useEffect(() => {
     const handleClick = (event) => {
